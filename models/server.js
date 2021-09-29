@@ -1,16 +1,26 @@
 const express = require('express');
 const cors=require('cors');
+const { dbConnection } = require('../database/config');
 
 class Server{
     constructor(){
-        this.app=express();
+        this.app=express();//crear el servidor 
         this.port=process.env.PORT;
-        this.usuariosPath='/api/usuarios';
-        /*Middlewares-son funciones que van a añadirle otra funcionalidad a mi webserver, es una funcion que se va a
+        this.usuariosPath='/api/usuarios';//path de usuarios
+        this.authPath='/api/auth';//path de autenticacion
+
+        //CONECTAR A BASE DE DATOS
+        this.conectarDB();
+
+        /*MIDDLEWARES-son funciones que van a añadirle otra funcionalidad a mi webserver, es una funcion que se va a
         ejecutar cuando se levante nuestro servidor */
         this.middlewares();
         //RUTAS DE MI APLICACION
         this.routes();
+    }
+    async conectarDB(){
+        await dbConnection();
+
     }
     middlewares(){
         //CORS
@@ -22,8 +32,10 @@ class Server{
         //Directorio publico
         this.app.use(express.static('public'));
     }
-    routes(){
+    routes(){//rutas de mi aplicacion, definiendolas
+        this.app.use(this.authPath,require('../routes/auth'));
         this.app.use(this.usuariosPath,require('../routes/user'));
+        
 
     }
 
